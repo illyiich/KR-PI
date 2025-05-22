@@ -81,6 +81,7 @@ body {
     transition: background-color 0.2s;
     width: 100%;
     margin-top: 12px;
+    transition: all 0.2s;
 }
 
 .btn-primary {
@@ -88,6 +89,7 @@ body {
     color: white;
     border: none;
     font-size: 1.025rem;
+    transition: all 0.2s;
 }
 
 .btn-primary:hover {
@@ -268,14 +270,36 @@ body {
     border: none;
     padding: 10px 16px;
     border-radius: 4px;
+    text-decoration: none;
     cursor: pointer;
     display: inline-block;
     width: auto;
     margin: 0 auto;
+    transition: all 0.2s;
 }
 
 .btn-reset:hover {
     background-color: #4a5568;
+}
+
+/* Стили для кнопки выхода */
+.btn-logout {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 2px solid  #4f46e5; /* Добавлена граница */
+    border-radius: 4px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    color:  #2219db;
+    text-decoration: none;
+    transition: all 0.2s; /* Эффект при наведении */
+}
+
+.btn-logout:hover {
+    background-color: #4f46e5; /* Изменение фона при наведении */
+    color: white; /* Изменение цвета текста при наведении */
+    border-color: #4338ca; /* Изменение цвета границы при наведении */
 }
 
 /* Стили для action-ссылок */
