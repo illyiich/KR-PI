@@ -4,110 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Справочник задолжников</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="bg-gray-100 font-sans">
-    <div class="container mx-auto p-6">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Справочник задолжников</h1>
+<body>
+    <div class="container">
+        <h1 class="dashboard-title">Справочник задолжников</h1>
 
         <!-- Отображение сообщений -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="mb-4 p-4 rounded-md {{ 'bg-red-100 text-red-700' if category == 'error' else 'bg-green-100 text-green-700' }}">
+                    <div class="message {{ 'message-error' if category == 'error' else 'message-success' }}">
                         {{ message }}
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-lg font-semibold text-gray-700 mb-4">Поиск по студенту</h3>
+        <div class="search-container">
+            <div class="search-box">
+                <h3 class="search-title">Поиск по студенту</h3>
                 <form method="POST">
-                    <input type="text" name="student_query" placeholder="Номер зачётной книжки" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    <button type="submit" class="mt-2 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Поиск
-                    </button>
+                    <input type="text" name="student_query" placeholder="Номер зачётной книжки" class="form-input">
+                    <button type="submit" class="btn btn-primary">Поиск</button>
                 </form>
             </div>
-            
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-lg font-semibold text-gray-700 mb-4">Поиск по группе</h3>
+
+            <div class="search-box">
+                <h3 class="search-title">Поиск по группе</h3>
                 <form method="POST">
-                    <input type="text" name="group_query" placeholder="Название группы" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    <button type="submit" class="mt-2 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Поиск
-                    </button>
+                    <input type="text" name="group_query" placeholder="Название группы" class="form-input">
+                    <button type="submit" class="btn btn-primary">Поиск</button>
                 </form>
             </div>
-            
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-lg font-semibold text-gray-700 mb-4">Поиск по дисциплине</h3>
+
+            <div class="search-box">
+                <h3 class="search-title">Поиск по дисциплине</h3>
                 <form method="POST">
-                    <input type="text" name="discipline_query" placeholder="Название дисциплины" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    <button type="submit" class="mt-2 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Поиск
-                    </button>
+                    <input type="text" name="discipline_query" placeholder="Название дисциплины" class="form-input">
+                    <button type="submit" class="btn btn-primary">Поиск</button>
                 </form>
             </div>
         </div>
 
-        <div class="text-center mb-6">
-            <a href="{{ url_for('dashboard') }}" class="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                Сбросить фильтры
-            </a>
+        <div class="text-center">
+            <a href="{{ url_for('dashboard') }}" class="btn-reset">Сбросить фильтры</a>
         </div>
 
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Результаты поиска</h2>
-        <div class="overflow-x-auto bg-white rounded-lg shadow-md">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+        <h2 class="dashboard-title-search">Результаты поиска</h2>
+        <div class="table-container">
+            <table class="results-table">
+                <thead>
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Номер зачетки</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Студент</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Группа</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип задолженности</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дисциплина</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Семестр</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Преподаватель</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Кафедра</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Зав. кафедрой</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Телефон</th>
+                        <th>Номер зачетки</th>
+                        <th>Студент</th>
+                        <th>Группа</th>
+                        <th>Тип задолженности</th>
+                        <th>Дисциплина</th>
+                        <th>Семестр</th>
+                        <th>Преподаватель</th>
+                        <th>Кафедра</th>
+                        <th>Зав. кафедрой</th>
+                        <th>Телефон</th>
                         {% if role == 'admin' %}
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                        <th>Действия</th>
                         {% endif %}
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody>
                     {% if debts %}
                         {% for debt in debts %}
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">{{ debt['record_book_number'] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ debt['student_name'] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ debt['group_name'] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ debt['debt_type'] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ debt['discipline'] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ debt['semester'] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ debt['teacher_name'] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ debt['department'] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ debt['head_of_department'] }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ debt['head_phone'] }}</td>
+                        <tr>
+                            <td>{{ debt['record_book_number'] }}</td>
+                            <td>{{ debt['student_name'] }}</td>
+                            <td>{{ debt['group_name'] }}</td>
+                            <td>{{ debt['debt_type'] }}</td>
+                            <td>{{ debt['discipline'] }}</td>
+                            <td>{{ debt['semester'] }}</td>
+                            <td>{{ debt['teacher_name'] }}</td>
+                            <td>{{ debt['department'] }}</td>
+                            <td>{{ debt['head_of_department'] }}</td>
+                            <td>{{ debt['head_phone'] }}</td>
                             {% if role == 'admin' %}
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td>
                                 {% if debt['debt_id'] and debt['debt_id'] != 0 %}
                                     <a href="{{ url_for('delete', debt_id=debt['debt_id']) }}" 
-                                       class="text-red-600 hover:text-red-900 mr-2"
+                                       class="action-link"
                                        onclick="return confirm('Удалить задолженность?')">
                                         Удалить задолженность
                                     </a>
                                 {% endif %}
                                 <form action="{{ url_for('delete_student') }}" method="POST" class="inline">
                                     <input type="hidden" name="record_book" value="{{ debt['record_book_number'] }}">
-                                    <button type="submit" class="text-red-600 hover:text-red-900"
+                                    <button type="submit" class="action-button"
                                             onclick="return confirm('Удалить студента и все его задолженности?')">
                                         Удалить студента
                                     </button>
@@ -118,7 +107,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="{% if role == 'admin' %}11{% else %}10{% endif %}" class="px-6 py-4 text-center text-gray-500">
+                            <td colspan="{% if role == 'admin' %}11{% else %}10{% endif %}" class="text-center">
                                 Нет данных для отображения.
                             </td>
                         </tr>
@@ -128,45 +117,44 @@
         </div>
 
         {% if role == 'admin' %}
-        <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Добавить новую запись</h2>
-            <form method="POST" action="{{ url_for('add') }}" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="record_book" class="block text-sm font-medium text-gray-700">Номер зачётной книжки *</label>
+        <div class="add-form">
+            <h2 class="dashboard-title-add">Добавить новую запись</h2>
+            <form method="POST" action="{{ url_for('add') }}">
+                <div class="form-grid">
+                    <div class="form-grid-item">
+                        <label for="record_book" class="form-label">Номер зачётной книжки *</label>
                         <input type="text" id="record_book" name="record_book" required
                                pattern="[ЗК]{2}-\d{3}"
                                placeholder="ЗК-XXX (например, ЗК-123)"
                                title="Номер зачётной книжки должен быть в формате ЗК-XXX (ЗК, дефис, три цифры)"
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                               class="form-input">
                     </div>
-                    <div>
-                        <label for="student_name" class="block text-sm font-medium text-gray-700">Имя студента *</label>
+                    <div class="form-grid-item">
+                        <label for="student_name" class="form-label">Имя студента *</label>
                         <input type="text" id="student_name" name="student_name" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                               class="form-input">
                     </div>
-                    <div>
-                        <label for="group_name" class="block text-sm font-medium text-gray-700">Группа *</label>
+                    <div class="form-grid-item">
+                        <label for="group_name" class="form-label">Группа *</label>
                         <input type="text" id="group_name" name="group_name" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                               class="form-input">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="discipline" class="block text-sm font-medium text-gray-700">Дисциплина *</label>
+                <div class="form-grid">
+                    <div class="form-grid-item">
+                        <label for="discipline" class="form-label">Дисциплина *</label>
                         <input type="text" id="discipline" name="discipline" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                               class="form-input">
                     </div>
-                    <div>
-                        <label for="semester" class="block text-sm font-medium text-gray-700">Семестр *</label>
+                    <div class="form-grid-item">
+                        <label for="semester" class="form-label">Семестр *</label>
                         <input type="number" id="semester" name="semester" required min="1" max="10"
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                               class="form-input">
                     </div>
-                    <div>
-                        <label for="debt_type" class="block text-sm font-medium text-gray-700">Тип задолженности *</label>
-                        <select id="debt_type" name="debt_type" required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <div class="form-grid-item">
+                        <label for="debt_type" class="form-label">Тип задолженности *</label>
+                        <select id="debt_type" name="debt_type" required class="form-input">
                             <option value="Экзамен">Экзамен</option>
                             <option value="Зачёт">Зачёт</option>
                             <option value="Дифференцированный зачёт">Дифференцированный зачёт</option>
@@ -175,47 +163,44 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="teacher_name" class="block text-sm font-medium text-gray-700">Преподаватель *</label>
+                <div class="form-grid">
+                    <div class="form-grid-item">
+                        <label for="teacher_name" class="form-label">Преподаватель *</label>
                         <input type="text" id="teacher_name" name="teacher_name" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                               class="form-input">
                     </div>
-                    <div>
-                        <label for="department" class="block text-sm font-medium text-gray-700">Кафедра *</label>
+                    <div class="form-grid-item">
+                        <label for="department" class="form-label">Кафедра *</label>
                         <input type="text" id="department" name="department" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                               class="form-input">
                     </div>
-                    <div>
-                        <label for="head_of_department" class="block text-sm font-medium text-gray-700">Заведующий кафедрой *</label>
+                    <div class="form-grid-item">
+                        <label for="head_of_department" class="form-label">Заведующий кафедрой *</label>
                         <input type="text" id="head_of_department" name="head_of_department" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                               class="form-input">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="head_phone" class="block text-sm font-medium text-gray-700">Телефон *</label>
+                <div class="form-grid">
+                    <div class="form-grid-item phone-input">
+                        <label for="head_phone" class="form-label">Телефон *</label>
                         <input type="text" id="head_phone" name="head_phone" required
                                pattern="\+7\(\d{3}\)\d{3}-\d{2}-\d{2}"
                                placeholder="+7(код региона)XXX-XX-XX (например, +7(495)123-45-67)"
                                title="Телефон должен быть в формате +7(код региона)XXX-XX-XX, например, +7(495)123-45-67"
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
+                               class="form-input">
                     </div>
                 </div>
 
-                <div class="pt-4">
-                    <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Добавить запись
-                    </button>
+                <div>
+                    <button type="submit" class="btn btn-primary">Добавить запись</button>
                 </div>
             </form>
         </div>
         {% endif %}
 
-        <div class="mt-6 text-center">
-            <a href="{{ url_for('logout') }}" class="text-indigo-600 hover:text-indigo-800 font-medium">Выйти</a>
+        <div class="text-center mt-6">
+            <a href="{{ url_for('logout') }}" class="link">Выйти</a>
         </div>
     </div>
 </body>

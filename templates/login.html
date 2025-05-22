@@ -4,35 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход в справочник</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Справочник задолжников</h1>
-        <h2 class="text-xl text-center text-gray-600 mb-6">Вход</h2>
+<body>
+    <div class="login-container">
+        <h1 class="login-title">Справочник задолжников</h1>
+        <h2 class="login-subtitle">Вход</h2>
 
         <!-- Отображение сообщений об ошибках -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="mb-4 p-4 rounded-md {{ 'bg-red-100 text-red-700' if category == 'error' else 'bg-green-100 text-green-700' }}">
+                    <div class="message {% if category == 'error' %}message-error{% else %}message-success{% endif %}">
                         {{ message }}
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <form method="POST" class="space-y-4">
-            <div>
-                <label for="username" class="block text-sm font-medium text-gray-700">Имя пользователя:</label>
-                <input type="text" id="username" name="username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+        <form method="POST">
+            <div class="form-group">
+                <label for="username" class="form-label">Имя пользователя:</label>
+                <input type="text" id="username" name="username" required class="form-input">
             </div>
-            <div>
-                <label for="password" class="block text-sm font-medium text-gray-700">Пароль:</label>
-                <input type="password" id="password" name="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            <div class="form-group">
+                <label for="password" class="form-label">Пароль:</label>
+                <input type="password" id="password" name="password" required class="form-input">
             </div>
-            <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Войти</button>
+            <button type="submit" class="btn btn-primary">Войти</button>
         </form>
     </div>
 </body>

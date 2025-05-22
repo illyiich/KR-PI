@@ -59,8 +59,14 @@ CREATE TABLE IF NOT EXISTS debts (
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE
 );
 
+
+-- Удаляем старые данные, если они есть (для чистоты)
 DELETE FROM debts;
 
+DELETE FROM students;
+
+-- Проверка содержимого таблиц
 SELECT * FROM debts;
 
+SELECT * FROM students;
 
