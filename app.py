@@ -56,7 +56,7 @@ def dashboard():
                d.debt_id, d.debt_type, d.discipline, d.semester,
                d.teacher_name, d.department, d.head_of_department, d.head_phone
         FROM students s
-        LEFT JOIN debts d ON s.student_id = d.student_id
+        INNER JOIN debts d ON s.student_id = d.student_id
         WHERE 1=1
         '''
         params = []
