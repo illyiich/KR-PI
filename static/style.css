@@ -151,7 +151,7 @@ body {
     text-align: center;
     color: #1a202c;
     margin-bottom: 32px;
-    margin-top: 32px;
+    margin-top: 40px;
 }
 
 .search-container {
@@ -183,6 +183,33 @@ body {
     font-weight: 600;
     color: #4a5568;
     margin-bottom: 16px;
+}
+
+/* Стили для кнопки сортировки */
+.sort-button-container {
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: flex-start; /* Выравниваем кнопку по левому краю */
+}
+
+.btn-sort {
+    background-color: #667eea;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    width: 110px; 
+    text-align: center;
+}
+
+.btn-sort:hover {
+    background-color: #5a67d8; /* Более тёмный оттенок индиго при наведении */
 }
 
 /* Стили для таблицы с горизонтальной и вертикальной прокруткой */
@@ -220,6 +247,11 @@ body {
     position: sticky;
     top: 0;
     z-index: 1; /* Чтобы заголовки оставались поверх при прокрутке */
+}
+
+.results-table th:first-child,
+.results-table td:first-child {
+    width: 110px; /* Фиксированная ширина для столбца "Номер зачётки" */
 }
 
 .results-table tr:hover {
@@ -308,6 +340,15 @@ body {
 
 .btn-reset:hover {
     background-color: #4a5568;
+}
+
+.btn-reset-form {
+    background-color: #718096; 
+    border: none;
+}
+
+.btn-reset-form:hover {
+    background-color: #4a5568; 
 }
 
 /* Стили для кнопки выхода */

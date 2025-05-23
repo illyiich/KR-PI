@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 import mysql.connector
 import re
 
@@ -29,7 +29,7 @@ def index():
 def login():
     role = request.args.get('role')  # Получаем роль из параметров URL
     if not role or role not in ['user', 'admin']:
-        flash('Не указана или неверная роль.', 'error')
+        flash('Не указана или неверная роль', 'error')
         return redirect(url_for('index'))
 
     if request.method == 'POST':
@@ -43,9 +43,9 @@ def login():
                 session['role'] = role
                 return redirect(url_for('dashboard'))
             else:
-                flash('Выбранная роль не соответствует имени пользователя.', 'error')
+                flash('Выбранная роль не соответствует имени пользователя', 'error')
         else:
-            flash('Неверное имя пользователя или пароль.', 'error')
+            flash('Неверное имя пользователя или пароль', 'error')
 
     return render_template('login.html', role=role)
 
@@ -79,7 +79,7 @@ def dashboard():
             if not debt.get('debt_id'):
                 debt['debt_id'] = 0
 
-        # Если есть данные в сессии, фильтруем их
+        # Если есть данные в сессии, используем их
         if 'filtered_debts' in session and session['filtered_debts']:
             session_debts = session['filtered_debts']
             # Фильтруем только те записи, которые всё ещё существуют в базе
@@ -126,6 +126,68 @@ def dashboard():
 
     return render_template('dashboard.html', debts=filtered_debts, role=session['role'])
 
+@app.route('/sort_by_record_book')
+def sort_by_record_book():
+    if 'role' not in session:
+        return redirect(url_for('index'))
+
+    # Загружаем данные из базы
+    conn = get_db_connection()
+    if not conn:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'error': 'Ошибка подключения к базе данных'}), 500
+        return render_template('dashboard.html', debts=[], role=session.get('role'))
+
+    cursor = conn.cursor(dictionary=True)
+    try:
+        query = '''
+        SELECT s.student_id, s.record_book_number, s.student_name, s.group_name, 
+               d.debt_id, d.debt_type, d.discipline, d.semester,
+               d.teacher_name, d.department, d.head_of_department, d.head_phone
+        FROM students s
+        INNER JOIN debts d ON s.student_id = d.student_id
+        '''
+        cursor.execute(query)
+        debts = cursor.fetchall()
+
+        # Обработка NULL значений
+        for debt in debts:
+            for key in debt:
+                if debt[key] is None:
+                    debt[key] = ''
+            if not debt.get('debt_id'):
+                debt['debt_id'] = 0
+
+        # Если есть отфильтрованные данные в сессии, используем их, иначе берём все данные
+        if 'filtered_debts' in session and session['filtered_debts']:
+            session_debts = session['filtered_debts']
+            valid_debt_ids = {debt['debt_id'] for debt in debts}
+            debts = [debt for debt in session_debts if debt['debt_id'] in valid_debt_ids]
+        else:
+            debts = debts
+
+        # Сортируем данные по номеру зачётной книжки
+        debts = sorted(debts, key=lambda x: x['record_book_number'])
+
+        # Сохраняем отсортированные данные в сессии
+        session['filtered_debts'] = debts
+
+        # Если это AJAX-запрос, возвращаем данные в формате JSON
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'debts': debts, 'role': session.get('role')})
+
+    except mysql.connector.Error as err:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'error': f'Ошибка базы данных: {err}'}), 500
+        flash(f'Ошибка базы данных: {err}', 'error')
+        debts = []
+    finally:
+        cursor.close()
+        conn.close()
+
+    # Если это не AJAX-запрос, рендерим страницу
+    return render_template('dashboard.html', debts=debts, role=session['role'])
+
 @app.route('/add', methods=['POST'])
 def add():
     if 'role' not in session or session['role'] != 'admin':
@@ -170,6 +232,20 @@ def add():
         flash('Семестр должен быть числом', 'error')
         return redirect(url_for('dashboard'))
 
+    # Проверка, что поля содержат только буквы, пробелы и буквы ё/Ё
+    letter_fields = {
+        'student_name': 'Имя студента',
+        'discipline': 'Дисциплина',
+        'teacher_name': 'Преподаватель',
+        'department': 'Кафедра',
+        'head_of_department': 'Заведующий кафедрой'
+    }
+
+    for field_key, field_name in letter_fields.items():
+        if not re.match(r'^[A-Za-zА-Яа-яЁё\s]+$', form_data[field_key]):
+            flash(f'Поле "{field_name}" должно содержать только буквы (включая ё/Ё) и пробелы (без цифр или других символов).', 'error')
+            return redirect(url_for('dashboard'))
+
     conn = get_db_connection()
     if not conn:
         return redirect(url_for('dashboard'))
@@ -188,7 +264,7 @@ def add():
             # Если студент с таким номером уже существует, сравниваем имена
             existing_name = existing_student['student_name']
             if existing_name != form_data['student_name']:
-                flash('Данная зачётка присвоена другому студенту.', 'error')
+                flash('Данный номер зачётки присвоен другому студенту', 'error')
                 return redirect(url_for('dashboard'))
 
         if not existing_student:
@@ -220,7 +296,7 @@ def add():
         existing_debt = cursor.fetchone()
 
         if existing_debt:
-            flash('Такая задолженность уже существует для этого студента.', 'error')
+            flash('Такая задолженность уже существует для этого студента', 'error')
         else:
             # Добавление записи о задолженности
             cursor.execute(
@@ -262,7 +338,7 @@ def delete(debt_id):
         cursor.execute('SELECT student_id FROM debts WHERE debt_id = %s', (debt_id,))
         debt = cursor.fetchone()
         if not debt:
-            flash('Задолженность не найдена.', 'error')
+            flash('Задолженность не найдена', 'error')
             return redirect(url_for('dashboard'))
 
         student_id = debt['student_id']
@@ -278,9 +354,9 @@ def delete(debt_id):
         # Если задолженностей больше нет, удаляем студента
         if debt_count == 0:
             cursor.execute('DELETE FROM students WHERE student_id = %s', (student_id,))
-            flash('Задолженность и студент удалены, так как у студента больше нет задолженностей.', 'success')
+            flash('Задолженность и студент удалены, так как у студента больше нет задолженностей', 'success')
         else:
-            flash('Задолженность успешно удалена.', 'success')
+            flash('Задолженность успешно удалена', 'success')
 
         # Сбрасываем фильтры в сессии после удаления
         session.pop('filtered_debts', None)
@@ -301,7 +377,7 @@ def delete_student():
 
     record_book = request.form.get('record_book')
     if not record_book:
-        flash('Не указан номер зачётной книжки.', 'error')
+        flash('Не указан номер зачётной книжки', 'error')
         return redirect(url_for('dashboard'))
 
     conn = get_db_connection()
@@ -314,7 +390,7 @@ def delete_student():
         # Удаление студента (debts удалятся автоматически благодаря ON DELETE CASCADE)
         cursor.execute('DELETE FROM students WHERE record_book_number = %s', (record_book,))
         conn.commit()
-        flash('Студент и все его задолженности успешно удалены.', 'success')
+        flash('Студент и все его задолженности успешно удалены', 'success')
         # Сбрасываем фильтры в сессии после удаления
         session.pop('filtered_debts', None)
     except mysql.connector.Error as err:

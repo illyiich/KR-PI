@@ -26,7 +26,7 @@
             <div class="search-box">
                 <h2 class="search-title">Поиск по студенту</h2>
                 <form method="POST">
-                    <input type="text" name="student_query" class="form-input" placeholder="Номер зачётной книжки">
+                    <input type="text" name="student_query" class="form-input" placeholder="Номер зачётной книжки (ЗК-XXX)">
                     <div class="button-container">
                         <button type="submit" class="btn btn-primary">Поиск</button>
                     </div>
@@ -59,6 +59,9 @@
         </div>
 
         <h2 class="dashboard-title-search">Результаты поиска</h2>
+        <div class="sort-button-container">
+            <a href="{{ url_for('sort_by_record_book') }}" class="btn-sort" onclick="sortByRecordBook(event)">Сортировать по ↑ номера зачётки</a>
+        </div>
 
         <div class="table-container">
             <table class="results-table">
@@ -79,7 +82,7 @@
                         {% endif %}
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="debts-table-body">
                     {% if debts %}
                         {% for debt in debts %}
                             <tr>
@@ -125,9 +128,7 @@
             <div class="add-form">
                 <h2 class="dashboard-title-add">Добавить новую запись</h2>
                 <form method="POST" action="{{ url_for('add') }}">
-
                     <div class="form-grid">
-
                         <div class="form-grid-item">
                             <label for="record_book" class="form-label">Номер зачётной книжки *</label>
                             <input type="text" id="record_book" name="record_book" class="form-input" required
@@ -136,13 +137,10 @@
                                     title="Номер зачётной книжки должен быть в формате ЗК-XXX (ЗК, дефис, три цифры)"
                                     class="form-input">
                         </div>
-
-
                         <div class="form-grid-item">
                             <label for="student_name" class="form-label">Имя студента *</label>
-                            <input type="text" id="student_name" name="student_name" class="form-input" required>
+                            <input type="text" id="student_name" name="student_name" class="form-input" pattern="^[A-Za-zА-Яа-яЁё\s]+$" title="Только буквы (включая ё/Ё) и пробелы (без цифр или других символов)" required>
                         </div>
-
                         <div class="form-grid-item">
                             <label for="group_name" class="form-label">Группа *</label>
                             <input type="text" id="group_name" name="group_name" class="form-input" required>
@@ -150,17 +148,14 @@
                     </div>
 
                     <div class="form-grid">
-
                         <div class="form-grid-item">
                             <label for="discipline" class="form-label">Дисциплина *</label>
-                            <input type="text" id="discipline" name="discipline" class="form-input" required>
+                            <input type="text" id="discipline" name="discipline" class="form-input" pattern="^[A-Za-zА-Яа-яЁё\s]+$" title="Только буквы (включая ё/Ё) и пробелы (без цифр или других символов)" required>
                         </div>
-
                         <div class="form-grid-item">
                             <label for="semester" class="form-label">Семестр *</label>
                              <input type="number" id="semester" name="semester" required min="1" max="10" class="form-input">
                         </div>
-
                         <div class="form-grid-item">
                             <label for="debt_type" class="form-label">Тип задолженности *</label>
                             <select id="debt_type" name="debt_type" class="form-input" required>
@@ -175,19 +170,18 @@
                     <div class="form-grid">
                         <div class="form-grid-item">
                             <label for="teacher_name" class="form-label">Преподаватель *</label>
-                            <input type="text" id="teacher_name" name="teacher_name" class="form-input" required>
+                            <input type="text" id="teacher_name" name="teacher_name" class="form-input" pattern="^[A-Za-zА-Яа-яЁё\s]+$" title="Только буквы (включая ё/Ё) и пробелы (без цифр или других символов)" required>
                         </div>
                         <div class="form-grid-item">
                             <label for="department" class="form-label">Кафедра *</label>
-                            <input type="text" id="department" name="department" class="form-input" required>
+                            <input type="text" id="department" name="department" class="form-input" pattern="^[A-Za-zА-Яа-яЁё\s]+$" title="Только буквы (включая ё/Ё) и пробелы (без цифр или других символов)" required>
                         </div>
-
                         <div class="form-grid-item">
                             <label for="head_of_department" class="form-label">Заведующий кафедрой *</label>
-                            <input type="text" id="head_of_department" name="head_of_department" class="form-input" required>
+                            <input type="text" id="head_of_department" name="head_of_department" class="form-input" pattern="^[A-Za-zА-Яа-яЁё\s]+$" title="Только буквы (включая ё/Ё) и пробелы (без цифр или других символов)" required>
                         </div>
                     </div>
-                    
+
                     <div class="form-grid">
                         <div class="form-grid-item phone-input">
                             <label for="head_phone" class="form-label">Телефон *</label>
@@ -201,8 +195,8 @@
 
                     <div class="button-container">
                         <button type="submit" class="btn btn-primary">Добавить запись</button>
+                        <button type="reset" class="btn btn-primary btn-reset-form">Сбросить</button>
                     </div>
-
                 </form>
             </div>
         {% endif %}
@@ -211,5 +205,72 @@
             <a href="{{ url_for('logout') }}" class="btn-logout">Выйти</a>
         </div>
     </div>
+
+    <script>
+        // Функция для сортировки таблицы через AJAX
+        function sortByRecordBook(event) {
+            event.preventDefault(); // Предотвращаем стандартное поведение ссылки (перезагрузку страницы)
+
+            fetch('/sort_by_record_book', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' // Указываем, что это AJAX-запрос
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error); // Показываем ошибку, если она есть
+                    return;
+                }
+
+                // Получаем тело таблицы
+                const tbody = document.getElementById('debts-table-body');
+                tbody.innerHTML = ''; // Очищаем текущее содержимое таблицы
+
+                // Если данные есть, заполняем таблицу
+                if (data.debts && data.debts.length > 0) {
+                    data.debts.forEach(debt => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${debt.record_book_number}</td>
+                            <td>${debt.student_name}</td>
+                            <td>${debt.group_name}</td>
+                            <td>${debt.debt_type}</td>
+                            <td>${debt.discipline}</td>
+                            <td>${debt.semester}</td>
+                            <td>${debt.teacher_name}</td>
+                            <td>${debt.department}</td>
+                            <td>${debt.head_of_department}</td>
+                            <td>${debt.head_phone}</td>
+                            ${data.role === 'admin' ? `
+                                <td>
+                                    ${debt.debt_id && debt.debt_id !== 0 ? `
+                                        <a href="/delete/${debt.debt_id}" class="action-link" onclick="return confirm('Удалить задолженность?')">Удалить задолженность</a>
+                                    ` : ''}
+                                    <form action="/delete_student" method="POST" class="inline">
+                                        <input type="hidden" name="record_book" value="${debt.record_book_number}">
+                                        <button type="submit" class="action-button" onclick="return confirm('Удалить студента и все его задолженности?')">
+                                            Удалить студента
+                                        </button>
+                                    </form>
+                                </td>
+                            ` : ''}
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    // Если данных нет, показываем сообщение
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="${data.role === 'admin' ? 11 : 10}" style="text-align: center;">Нет данных для отображения.</td>`;
+                    tbody.appendChild(row);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при сортировке.');
+            });
+        }
+    </script>
 </body>
 </html>
