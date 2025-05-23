@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход в справочник</title>
+    <title>Справочник задолжников - Вход</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="login-container">
         <h1 class="login-title">Справочник задолжников</h1>
-        <h2 class="login-subtitle">Вход</h2>
+        <h2 class="login-subtitle">Вход для {{ 'администратора' if role == 'admin' else 'пользователя' }}</h2>
 
-        <!-- Отображение сообщений об ошибках -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="message {% if category == 'error' %}message-error{% else %}message-success{% endif %}">
+                    <div class="message {{ 'message-error' if category == 'error' else 'message-success' }}">
                         {{ message }}
                     </div>
                 {% endfor %}
@@ -25,13 +24,17 @@
         <form method="POST">
             <div class="form-group">
                 <label for="username" class="form-label">Имя пользователя:</label>
-                <input type="text" id="username" name="username" required class="form-input">
+                <input type="text" id="username" name="username" class="form-input" required>
             </div>
+
             <div class="form-group">
                 <label for="password" class="form-label">Пароль:</label>
-                <input type="password" id="password" name="password" required class="form-input">
+                <input type="password" id="password" name="password" class="form-input" required>
             </div>
-            <button type="submit" class="btn btn-primary">Войти</button>
+
+            <div class="button-container">
+                <button type="submit" class="btn btn-primary login-button">Войти</button>
+            </div>
         </form>
     </div>
 </body>

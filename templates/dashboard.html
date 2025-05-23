@@ -10,48 +10,56 @@
     <div class="container">
         <h1 class="dashboard-title">Справочник задолжников</h1>
 
-        <!-- Отображение сообщений -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="message {{ 'message-error' if category == 'error' else 'message-success' }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+        <div class="messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="message {{ 'message-error' if category == 'error' else 'message-success' }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
 
         <div class="search-container">
             <div class="search-box">
-                <h3 class="search-title">Поиск по студенту</h3>
+                <h2 class="search-title">Поиск по студенту</h2>
                 <form method="POST">
-                    <input type="text" name="student_query" placeholder="Номер зачётной книжки" class="form-input">
-                    <button type="submit" class="btn btn-primary">Поиск</button>
+                    <input type="text" name="student_query" class="form-input" placeholder="Номер зачётной книжки">
+                    <div class="button-container">
+                        <button type="submit" class="btn btn-primary">Поиск</button>
+                    </div>
                 </form>
             </div>
 
             <div class="search-box">
-                <h3 class="search-title">Поиск по группе</h3>
+                <h2 class="search-title">Поиск по группе</h2>
                 <form method="POST">
-                    <input type="text" name="group_query" placeholder="Название группы" class="form-input">
-                    <button type="submit" class="btn btn-primary">Поиск</button>
+                    <input type="text" name="group_query" class="form-input" placeholder="Название группы">
+                    <div class="button-container">
+                        <button type="submit" class="btn btn-primary">Поиск</button>
+                    </div>
                 </form>
             </div>
 
             <div class="search-box">
-                <h3 class="search-title">Поиск по дисциплине</h3>
+                <h2 class="search-title">Поиск по дисциплине</h2>
                 <form method="POST">
-                    <input type="text" name="discipline_query" placeholder="Название дисциплины" class="form-input">
-                    <button type="submit" class="btn btn-primary">Поиск</button>
+                    <input type="text" name="discipline_query" class="form-input" placeholder="Название дисциплины">
+                    <div class="button-container">
+                        <button type="submit" class="btn btn-primary">Поиск</button>
+                    </div>
                 </form>
             </div>
         </div>
 
         <div class="text-center">
-            <a href="{{ url_for('dashboard') }}" class="btn-reset">Сбросить фильтры</a>
+            <a href="{{ url_for('reset_filters') }}" class="btn-reset">Сбросить фильтры</a>
         </div>
 
         <h2 class="dashboard-title-search">Результаты поиска</h2>
+
         <div class="table-container">
             <table class="results-table">
                 <thead>
@@ -67,47 +75,44 @@
                         <th>Зав. кафедрой</th>
                         <th>Телефон</th>
                         {% if role == 'admin' %}
-                        <th>Действия</th>
+                            <th>Действия</th>
                         {% endif %}
                     </tr>
                 </thead>
                 <tbody>
                     {% if debts %}
                         {% for debt in debts %}
-                        <tr>
-                            <td>{{ debt['record_book_number'] }}</td>
-                            <td>{{ debt['student_name'] }}</td>
-                            <td>{{ debt['group_name'] }}</td>
-                            <td>{{ debt['debt_type'] }}</td>
-                            <td>{{ debt['discipline'] }}</td>
-                            <td>{{ debt['semester'] }}</td>
-                            <td>{{ debt['teacher_name'] }}</td>
-                            <td>{{ debt['department'] }}</td>
-                            <td>{{ debt['head_of_department'] }}</td>
-                            <td>{{ debt['head_phone'] }}</td>
-                            {% if role == 'admin' %}
-                            <td>
-                                {% if debt['debt_id'] and debt['debt_id'] != 0 %}
-                                    <a href="{{ url_for('delete', debt_id=debt['debt_id']) }}" 
-                                       class="action-link"
-                                       onclick="return confirm('Удалить задолженность?')">
-                                        Удалить задолженность
-                                    </a>
+                            <tr>
+                                <td>{{ debt['record_book_number'] }}</td>
+                                <td>{{ debt['student_name'] }}</td>
+                                <td>{{ debt['group_name'] }}</td>
+                                <td>{{ debt['debt_type'] }}</td>
+                                <td>{{ debt['discipline'] }}</td>
+                                <td>{{ debt['semester'] }}</td>
+                                <td>{{ debt['teacher_name'] }}</td>
+                                <td>{{ debt['department'] }}</td>
+                                <td>{{ debt['head_of_department'] }}</td>
+                                <td>{{ debt['head_phone'] }}</td>
+                                {% if role == 'admin' %}
+                                    <td>
+                                        {% if debt['debt_id'] and debt['debt_id'] != 0 %}
+                                            <a href="{{ url_for('delete', debt_id=debt['debt_id']) }}" class="action-link"
+                                               onclick="return confirm('Удалить задолженность?')">Удалить задолженность</a>
+                                        {% endif %}
+                                        <form action="{{ url_for('delete_student') }}" method="POST" class="inline">
+                                            <input type="hidden" name="record_book" value="{{ debt['record_book_number'] }}">
+                                            <button type="submit" class="action-button"
+                                                    onclick="return confirm('Удалить студента и все его задолженности?')">
+                                                Удалить студента
+                                            </button>
+                                        </form>
+                                    </td>
                                 {% endif %}
-                                <form action="{{ url_for('delete_student') }}" method="POST" class="inline">
-                                    <input type="hidden" name="record_book" value="{{ debt['record_book_number'] }}">
-                                    <button type="submit" class="action-button"
-                                            onclick="return confirm('Удалить студента и все его задолженности?')">
-                                        Удалить студента
-                                    </button>
-                                </form>
-                            </td>
-                            {% endif %}
-                        </tr>
+                            </tr>
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="{% if role == 'admin' %}11{% else %}10{% endif %}" class="text-center">
+                            <td colspan="{{ 11 if role == 'admin' else 10 }}" style="text-align: center;">
                                 Нет данных для отображения.
                             </td>
                         </tr>
@@ -117,86 +122,89 @@
         </div>
 
         {% if role == 'admin' %}
-        <div class="add-form">
-            <h2 class="dashboard-title-add">Добавить новую запись</h2>
-            <form method="POST" action="{{ url_for('add') }}">
-                <div class="form-grid">
-                    <div class="form-grid-item">
-                        <label for="record_book" class="form-label">Номер зачётной книжки *</label>
-                        <input type="text" id="record_book" name="record_book" required
-                               pattern="[ЗК]{2}-\d{3}"
-                               placeholder="ЗК-XXX (например, ЗК-123)"
-                               title="Номер зачётной книжки должен быть в формате ЗК-XXX (ЗК, дефис, три цифры)"
-                               class="form-input">
-                    </div>
-                    <div class="form-grid-item">
-                        <label for="student_name" class="form-label">Имя студента *</label>
-                        <input type="text" id="student_name" name="student_name" required
-                               class="form-input">
-                    </div>
-                    <div class="form-grid-item">
-                        <label for="group_name" class="form-label">Группа *</label>
-                        <input type="text" id="group_name" name="group_name" required
-                               class="form-input">
-                    </div>
-                </div>
+            <div class="add-form">
+                <h2 class="dashboard-title-add">Добавить новую запись</h2>
+                <form method="POST" action="{{ url_for('add') }}">
 
-                <div class="form-grid">
-                    <div class="form-grid-item">
-                        <label for="discipline" class="form-label">Дисциплина *</label>
-                        <input type="text" id="discipline" name="discipline" required
-                               class="form-input">
-                    </div>
-                    <div class="form-grid-item">
-                        <label for="semester" class="form-label">Семестр *</label>
-                        <input type="number" id="semester" name="semester" required min="1" max="10"
-                               class="form-input">
-                    </div>
-                    <div class="form-grid-item">
-                        <label for="debt_type" class="form-label">Тип задолженности *</label>
-                        <select id="debt_type" name="debt_type" required class="form-input">
-                            <option value="Экзамен">Экзамен</option>
-                            <option value="Зачёт">Зачёт</option>
-                            <option value="Дифференцированный зачёт">Дифференцированный зачёт</option>
-                            <option value="Курсовая работа">Курсовая работа</option>
-                        </select>
-                    </div>
-                </div>
+                    <div class="form-grid">
 
-                <div class="form-grid">
-                    <div class="form-grid-item">
-                        <label for="teacher_name" class="form-label">Преподаватель *</label>
-                        <input type="text" id="teacher_name" name="teacher_name" required
-                               class="form-input">
-                    </div>
-                    <div class="form-grid-item">
-                        <label for="department" class="form-label">Кафедра *</label>
-                        <input type="text" id="department" name="department" required
-                               class="form-input">
-                    </div>
-                    <div class="form-grid-item">
-                        <label for="head_of_department" class="form-label">Заведующий кафедрой *</label>
-                        <input type="text" id="head_of_department" name="head_of_department" required
-                               class="form-input">
-                    </div>
-                </div>
+                        <div class="form-grid-item">
+                            <label for="record_book" class="form-label">Номер зачётной книжки *</label>
+                            <input type="text" id="record_book" name="record_book" class="form-input" required
+                                    pattern="[ЗК]{2}-\d{3}"
+                                    placeholder="ЗК-XXX (например, ЗК-123)"
+                                    title="Номер зачётной книжки должен быть в формате ЗК-XXX (ЗК, дефис, три цифры)"
+                                    class="form-input">
+                        </div>
 
-                <div class="form-grid">
-                    <div class="form-grid-item phone-input">
-                        <label for="head_phone" class="form-label">Телефон *</label>
-                        <input type="text" id="head_phone" name="head_phone" required
-                               pattern="\+7\(\d{3}\)\d{3}-\d{2}-\d{2}"
-                               placeholder="+7(код региона)XXX-XX-XX (например, +7(495)123-45-67)"
-                               title="Телефон должен быть в формате +7(код региона)XXX-XX-XX, например, +7(495)123-45-67"
-                               class="form-input">
-                    </div>
-                </div>
 
-                <div>
-                    <button type="submit" class="btn btn-primary">Добавить запись</button>
-                </div>
-            </form>
-        </div>
+                        <div class="form-grid-item">
+                            <label for="student_name" class="form-label">Имя студента *</label>
+                            <input type="text" id="student_name" name="student_name" class="form-input" required>
+                        </div>
+
+                        <div class="form-grid-item">
+                            <label for="group_name" class="form-label">Группа *</label>
+                            <input type="text" id="group_name" name="group_name" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+
+                        <div class="form-grid-item">
+                            <label for="discipline" class="form-label">Дисциплина *</label>
+                            <input type="text" id="discipline" name="discipline" class="form-input" required>
+                        </div>
+
+                        <div class="form-grid-item">
+                            <label for="semester" class="form-label">Семестр *</label>
+                             <input type="number" id="semester" name="semester" required min="1" max="10" class="form-input">
+                        </div>
+
+                        <div class="form-grid-item">
+                            <label for="debt_type" class="form-label">Тип задолженности *</label>
+                            <select id="debt_type" name="debt_type" class="form-input" required>
+                                <option value="Экзамен">Экзамен</option>
+                                <option value="Зачёт">Зачёт</option>
+                                <option value="Дифференцированный зачёт">Дифференцированный зачёт</option>
+                                <option value="Курсовая работа">Курсовая работа</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-grid-item">
+                            <label for="teacher_name" class="form-label">Преподаватель *</label>
+                            <input type="text" id="teacher_name" name="teacher_name" class="form-input" required>
+                        </div>
+                        <div class="form-grid-item">
+                            <label for="department" class="form-label">Кафедра *</label>
+                            <input type="text" id="department" name="department" class="form-input" required>
+                        </div>
+
+                        <div class="form-grid-item">
+                            <label for="head_of_department" class="form-label">Заведующий кафедрой *</label>
+                            <input type="text" id="head_of_department" name="head_of_department" class="form-input" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-grid-item phone-input">
+                            <label for="head_phone" class="form-label">Телефон *</label>
+                            <input type="text" id="head_phone" name="head_phone" required
+                                pattern="\+7\(\d{3}\)\d{3}-\d{2}-\d{2}"
+                                placeholder="+7(код региона)XXX-XX-XX"
+                                title="Телефон должен быть в формате +7(код региона)XXX-XX-XX"
+                                class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="button-container">
+                        <button type="submit" class="btn btn-primary">Добавить запись</button>
+                    </div>
+
+                </form>
+            </div>
         {% endif %}
 
         <div class="text-center mt-6">
