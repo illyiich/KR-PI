@@ -10,7 +10,7 @@ db_config = {
     'host': 'localhost',
     'user': 'ilya',
     'password': 'password',
-    'database': 'spravochnik4'
+    'database': 'spravochnik'
 }
 
 def get_db_connection():
@@ -57,10 +57,11 @@ def dashboard():
     # Всегда загружаем свежие данные из базы
     conn = get_db_connection()
     if not conn:
-        return render_template('dashboard.html', debts=[], role=session.get('role'))
+        return render_template('dashboard.html', debts=[], role=session.get('role'), teachers=[], disciplines=[], departments=[], groups=[], heads=[])
 
     cursor = conn.cursor(dictionary=True)
     try:
+        # Основной запрос для получения данных о задолженностях
         query = '''
         SELECT s.student_id, s.record_book_number, s.student_name, s.group_name, 
                d.debt_id, d.debt_type, d.discipline, d.semester,
@@ -88,9 +89,35 @@ def dashboard():
         else:
             debts = debts  # Используем свежие данные из базы
 
+        # Извлечение уникальных значений для выпадающих списков
+        # Уникальные преподаватели
+        cursor.execute('SELECT DISTINCT teacher_name FROM debts WHERE teacher_name IS NOT NULL AND teacher_name != ""')
+        teachers = [row['teacher_name'] for row in cursor.fetchall()]
+
+        # Уникальные дисциплины
+        cursor.execute('SELECT DISTINCT discipline FROM debts WHERE discipline IS NOT NULL AND discipline != ""')
+        disciplines = [row['discipline'] for row in cursor.fetchall()]
+
+        # Уникальные кафедры
+        cursor.execute('SELECT DISTINCT department FROM debts WHERE department IS NOT NULL AND department != ""')
+        departments = [row['department'] for row in cursor.fetchall()]
+
+        # Уникальные группы
+        cursor.execute('SELECT DISTINCT group_name FROM students WHERE group_name IS NOT NULL AND group_name != ""')
+        groups = [row['group_name'] for row in cursor.fetchall()]
+
+        # Уникальные заведующие кафедрой
+        cursor.execute('SELECT DISTINCT head_of_department FROM debts WHERE head_of_department IS NOT NULL AND head_of_department != ""')
+        heads = [row['head_of_department'] for row in cursor.fetchall()]
+
     except mysql.connector.Error as err:
         flash(f'Ошибка базы данных: {err}', 'error')
         debts = []
+        teachers = []
+        disciplines = []
+        departments = []
+        groups = []
+        heads = []
     finally:
         cursor.close()
         conn.close()
@@ -124,7 +151,9 @@ def dashboard():
     # Сохраняем отфильтрованные данные в сессии
     session['filtered_debts'] = filtered_debts
 
-    return render_template('dashboard.html', debts=filtered_debts, role=session['role'])
+    return render_template('dashboard.html', debts=filtered_debts, role=session['role'], 
+                           teachers=teachers, disciplines=disciplines, departments=departments, 
+                           groups=groups, heads=heads)
 
 @app.route('/sort_by_record_book')
 def sort_by_record_book():
@@ -136,7 +165,7 @@ def sort_by_record_book():
     if not conn:
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return jsonify({'error': 'Ошибка подключения к базе данных'}), 500
-        return render_template('dashboard.html', debts=[], role=session.get('role'))
+        return render_template('dashboard.html', debts=[], role=session.get('role'), teachers=[], disciplines=[], departments=[], groups=[], heads=[])
 
     cursor = conn.cursor(dictionary=True)
     try:
@@ -185,8 +214,29 @@ def sort_by_record_book():
         cursor.close()
         conn.close()
 
+    # Извлечение уникальных значений для выпадающих списков (для обычного рендеринга)
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute('SELECT DISTINCT teacher_name FROM debts WHERE teacher_name IS NOT NULL AND teacher_name != ""')
+        teachers = [row['teacher_name'] for row in cursor.fetchall()]
+        cursor.execute('SELECT DISTINCT discipline FROM debts WHERE discipline IS NOT NULL AND discipline != ""')
+        disciplines = [row['discipline'] for row in cursor.fetchall()]
+        cursor.execute('SELECT DISTINCT department FROM debts WHERE department IS NOT NULL AND department != ""')
+        departments = [row['department'] for row in cursor.fetchall()]
+        cursor.execute('SELECT DISTINCT group_name FROM students WHERE group_name IS NOT NULL AND group_name != ""')
+        groups = [row['group_name'] for row in cursor.fetchall()]
+        cursor.execute('SELECT DISTINCT head_of_department FROM debts WHERE head_of_department IS NOT NULL AND head_of_department != ""')
+        heads = [row['head_of_department'] for row in cursor.fetchall()]
+    except mysql.connector.Error:
+        teachers = disciplines = departments = groups = heads = []
+    finally:
+        cursor.close()
+        conn.close()
+
     # Если это не AJAX-запрос, рендерим страницу
-    return render_template('dashboard.html', debts=debts, role=session['role'])
+    return render_template('dashboard.html', debts=debts, role=session['role'], 
+                           teachers=teachers, disciplines=disciplines, departments=departments, 
+                           groups=groups, heads=heads)
 
 @app.route('/add', methods=['POST'])
 def add():

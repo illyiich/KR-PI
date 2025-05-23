@@ -26,7 +26,7 @@
             <div class="search-box">
                 <h2 class="search-title">Поиск по студенту</h2>
                 <form method="POST">
-                    <input type="text" name="student_query" class="form-input" placeholder="Номер зачётной книжки (ЗК-XXX)">
+                    <input type="text" name="student_query" class="form-input" placeholder="Номер зачётной книжки">
                     <div class="button-container">
                         <button type="submit" class="btn btn-primary">Поиск</button>
                     </div>
@@ -129,6 +129,7 @@
                 <h2 class="dashboard-title-add">Добавить новую запись</h2>
                 <form method="POST" action="{{ url_for('add') }}">
                     <div class="form-grid">
+
                         <div class="form-grid-item">
                             <label for="record_book" class="form-label">Номер зачётной книжки *</label>
                             <input type="text" id="record_book" name="record_book" class="form-input" required
@@ -137,25 +138,39 @@
                                     title="Номер зачётной книжки должен быть в формате ЗК-XXX (ЗК, дефис, три цифры)"
                                     class="form-input">
                         </div>
+
                         <div class="form-grid-item">
                             <label for="student_name" class="form-label">Имя студента *</label>
                             <input type="text" id="student_name" name="student_name" class="form-input" pattern="^[A-Za-zА-Яа-яЁё\s]+$" title="Только буквы (включая ё/Ё) и пробелы (без цифр или других символов)" required>
                         </div>
+
                         <div class="form-grid-item">
                             <label for="group_name" class="form-label">Группа *</label>
-                            <input type="text" id="group_name" name="group_name" class="form-input" required>
+                            <input type="text" id="group_name" name="group_name" class="form-input" list="group_list" required>
+                            <datalist id="group_list">
+                                {% for group in groups %}
+                                    <option value="{{ group }}">{{ group }}</option>
+                                {% endfor %}
+                            </datalist>
                         </div>
                     </div>
 
                     <div class="form-grid">
                         <div class="form-grid-item">
                             <label for="discipline" class="form-label">Дисциплина *</label>
-                            <input type="text" id="discipline" name="discipline" class="form-input" pattern="^[A-Za-zА-Яа-яЁё\s]+$" title="Только буквы (включая ё/Ё) и пробелы (без цифр или других символов)" required>
+                            <input type="text" id="discipline" name="discipline" class="form-input" list="discipline_list" pattern="^[A-Za-zА-Яа-яЁё\s]+$" title="Только буквы (включая ё/Ё) и пробелы (без цифр или других символов)" required>
+                            <datalist id="discipline_list">
+                                {% for discipline in disciplines %}
+                                    <option value="{{ discipline }}">{{ discipline }}</option>
+                                {% endfor %}
+                            </datalist>
                         </div>
+
                         <div class="form-grid-item">
                             <label for="semester" class="form-label">Семестр *</label>
-                             <input type="number" id="semester" name="semester" required min="1" max="10" class="form-input">
+                            <input type="number" id="semester" name="semester" required min="1" max="10" class="form-input">
                         </div>
+
                         <div class="form-grid-item">
                             <label for="debt_type" class="form-label">Тип задолженности *</label>
                             <select id="debt_type" name="debt_type" class="form-input" required>
@@ -170,15 +185,32 @@
                     <div class="form-grid">
                         <div class="form-grid-item">
                             <label for="teacher_name" class="form-label">Преподаватель *</label>
-                            <input type="text" id="teacher_name" name="teacher_name" class="form-input" pattern="^[A-Za-zА-Яа-яЁё\s]+$" title="Только буквы (включая ё/Ё) и пробелы (без цифр или других символов)" required>
+                            <input type="text" id="teacher_name" name="teacher_name" class="form-input" list="teacher_list" pattern="^[A-Za-zА-Яа-яЁё\s]+$" title="Только буквы (включая ё/Ё) и пробелы (без цифр или других символов)" required>
+                            <datalist id="teacher_list">
+                                {% for teacher in teachers %}
+                                    <option value="{{ teacher }}">{{ teacher }}</option>
+                                {% endfor %}
+                            </datalist>
                         </div>
+
                         <div class="form-grid-item">
                             <label for="department" class="form-label">Кафедра *</label>
-                            <input type="text" id="department" name="department" class="form-input" pattern="^[A-Za-zА-Яа-яЁё\s]+$" title="Только буквы (включая ё/Ё) и пробелы (без цифр или других символов)" required>
+                            <input type="text" id="department" name="department" class="form-input" list="department_list" pattern="^[A-Za-zА-Яа-яЁё\s]+$" title="Только буквы (включая ё/Ё) и пробелы (без цифр или других символов)" required>
+                            <datalist id="department_list">
+                                {% for department in departments %}
+                                    <option value="{{ department }}">{{ department }}</option>
+                                {% endfor %}
+                            </datalist>
                         </div>
+
                         <div class="form-grid-item">
                             <label for="head_of_department" class="form-label">Заведующий кафедрой *</label>
-                            <input type="text" id="head_of_department" name="head_of_department" class="form-input" pattern="^[A-Za-zА-Яа-яЁё\s]+$" title="Только буквы (включая ё/Ё) и пробелы (без цифр или других символов)" required>
+                            <input type="text" id="head_of_department" name="head_of_department" class="form-input" list="head_list" pattern="^[A-Za-zА-Яа-яЁё\s]+$" title="Только буквы (включая ё/Ё) и пробелы (без цифр или других символов)" required>
+                            <datalist id="head_list">
+                                {% for head in heads %}
+                                    <option value="{{ head }}">{{ head }}</option>
+                                {% endfor %}
+                            </datalist>
                         </div>
                     </div>
 
