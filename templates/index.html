@@ -3,17 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Справочник задолжников - Выбор роли</title>
+    <title>Справочник задолжников</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="login-container">
         <h1 class="login-title">Справочник задолжников</h1>
-        <h2 class="login-subtitle">Выберите роль для входа</h2>
+        <p class="login-subtitle">Выберите роль для входа</p>
         <div class="role-buttons">
-            <a href="{{ url_for('login', role='user') }}" class="btn btn-primary role-btn">Войти как пользователь</a>
-            <a href="{{ url_for('login', role='admin') }}" class="btn btn-primary role-btn">Войти как администратор</a>
+            <a href="{{ url_for('login', role='user') }}" class="role-btn btn btn-primary">Войти как пользователь</a>
+            <a href="{{ url_for('login', role='admin') }}" class="role-btn btn btn-primary">Войти как администратор</a>
         </div>
     </div>
+
+    <a href="#" class="btn-help" id="helpBtn">Справка</a>
+
+    <!-- Окно справки -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeBtn">×</span>
+            <h2>Справка пользователя</h2>
+            <p><strong>О системе:</strong> "Справочник задолжников" — это веб-приложение для управления данными о студентах с академическими задолженностями в образовательных учреждениях.</p>
+            <p><strong>Роли пользователей:</strong></p>
+            <ul>
+                <li><strong>Пользователь:</strong> Может просматривать список задолженностей, искать записи по номеру зачётной книжки, группе или дисциплине, сортировать данные и сбрасывать фильтры.</li>
+                <li><strong>Администратор:</strong> Имеет все права пользователя, а также может добавлять новые записи, удалять задолженности или студентов.</li>
+            </ul>
+            <p><strong>Основные действия:</strong></p>
+            <ul>
+                <li>Для входа выберите свою роль (Пользователь или Администратор) и введите имя пользователя и пароль.</li>
+                <li>После входа используйте панель управления для работы с данными.</li>
+                <li>Для выхода нажмите кнопку "Выйти" на странице панели.</li>
+            </ul>
+            <p>Если возникли вопросы, обратитесь к администратору системы.</p>
+        </div>
+    </div>
+
+    <script>
+        // Получаем элементы
+        const helpBtn = document.getElementById('helpBtn');
+        const helpModal = document.getElementById('helpModal');
+        const closeBtn = document.getElementById('closeBtn');
+
+        // Открытие модального окна при клике на кнопку "Справка"
+        helpBtn.addEventListener('click', function(event) {
+            event.preventDefault(); // Предотвращаем переход по ссылке
+            helpModal.style.display = 'block';
+        });
+
+        // Закрытие модального окна при клике на крестик
+        closeBtn.addEventListener('click', function() {
+            helpModal.style.display = 'none';
+        });
+
+        // Закрытие модального окна при клике вне его
+        window.addEventListener('click', function(event) {
+            if (event.target === helpModal) {
+                helpModal.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

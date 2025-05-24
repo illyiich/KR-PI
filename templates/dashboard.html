@@ -26,7 +26,7 @@
             <div class="search-box">
                 <h2 class="search-title">Поиск по студенту</h2>
                 <form method="POST">
-                    <input type="text" name="student_query" class="form-input" placeholder="Номер зачётной книжки">
+                    <input type="text" name="student_query" class="form-input" placeholder="Номер зачётной книжки (ЗК-XXX)">
                     <div class="button-container">
                         <button type="submit" class="btn btn-primary">Поиск</button>
                     </div>
@@ -239,7 +239,7 @@
     </div>
 
     <script>
-        // Функция для сортировки таблицы через AJAX
+        // Функция для сортировки таблицы через AJAX (для кнопки сортировки)
         function sortByRecordBook(event) {
             event.preventDefault(); // Предотвращаем стандартное поведение ссылки (перезагрузку страницы)
 
